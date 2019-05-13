@@ -1,0 +1,166 @@
+\documentclass{report}
+\usepackage[T1]{fontenc} % Fontes T1
+\usepackage[utf8]{inputenc} % Input UTF8
+\usepackage[backend=biber, style=ieee]{biblatex} % para usar bibliografia
+\usepackage{csquotes}
+\usepackage[portuguese]{babel} %Usar língua portuguesa
+\usepackage{blindtext} % Gerar texto automaticamente
+\usepackage[printonlyused]{acronym}
+\usepackage{hyperref} % para autoref
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\bibliography{bibliografia}
+
+
+\begin{document}
+%%
+% Definições
+%
+\def\titulo{Trabalho de Aprofundamento 2: Speedtesting}
+\def\data{31/03/2019}
+\def\autores{João Tiago Rainho, Sofia Teixeira Vaz}
+\def\autorescontactos{(92984) tiago.rainho@ua.pt, (92968) sofiateixeiravaz@ua.pt}
+\def\versao{VERSAO}
+\def\departamento{DEPARTAMENTO DE ELETRÓNICA, TELECOMUNICAÇÕES E INFORMÁTICA}
+\def\empresa{UNIVERSIDADE DE AVEIRO}
+\def\logotipo{ua.pdf}
+%
+%%%%%% CAPA %%%%%%
+%
+\begin{titlepage}
+
+\begin{center}
+%
+\vspace*{50mm}
+%
+{\Huge \titulo}\\ 
+%
+\vspace{10mm}
+%
+{\Large \empresa}\\
+%
+\vspace{10mm}
+%
+{\LARGE \autores}\\ 
+%
+\vspace{30mm}
+%
+\begin{figure}[h]
+\center
+\includegraphics{\logotipo}
+\end{figure}
+%
+\vspace{30mm}
+\end{center}
+%
+\begin{flushright}
+\versao
+\end{flushright}
+\end{titlepage}
+
+%%  Página de Título %%
+\title{%
+{\Huge\textbf{\titulo}}\\
+{\Large \departamento\\ \empresa}
+}
+%
+\author{%
+    \autores \\
+    \autorescontactos
+}
+%
+\date{\data}
+%
+\maketitle
+
+\pagenumbering{roman}
+
+%%%%%% RESUMO %%%%%%
+\begin{abstract}
+Este trabalho, que se baseia na criação de um cliente para fazer \textit{speedtesting}, visa a proteção do utilizador, como foi referido na introdução. No entanto, a nossa ferramenta, apesar de eficiente, não é o melhor disponível, uma vez que diversas empresas já fizeram ferramentas parecidas com resultados mais viáveis.
+\end{abstract}
+
+%%%%%% Agradecimentos %%%%%%
+% Segundo glisc deveria aparecer após conclusão...
+%\renewcommand{\abstractname}{Agradecimentos}
+%\begin{abstract}
+%Eventuais agradecimentos.
+%Comentar bloco caso não existam agradecimentos a fazer.
+%\end{abstract}
+
+
+\tableofcontents
+\listoftables     % descomentar se necessário
+% \listoffigures    % descomentar se necessário
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\pagenumbering{arabic}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introdução}
+\label{chap.introducao}
+A internet, apesar de ser vendida como algo tangível, não o é. Assim, o consumidor pode facilmente ser enganado pela operadora, uma vez que pode estar a pagar por uma qualidade que não está a receber e nem se aperceber disso. É nesse contexto que a nossa ferramenta de \textit{speedtesting} foi criada, no entanto, há mais razões. Uma destas pode ser verificação de tráfego, e outra ainda é verificação da qualidade da placa de rede do computador em si.
+Este documento está dividido em quatro capítulos.
+Depois desta introdução,
+no \autoref{chap.metodologia} é apresentada a metodologia seguida,
+no \autoref{chap.resultados} são apresentados os resultados obtidos,
+sendo estes discutidos no \autoref{chap.analise}.
+Finalmente, no \autoref{chap.conclusao} são apresentadas
+as conclusões do trabalho.
+
+\chapter{Metodologia}
+\label{chap.metodologia}
+Na fase inicial, tentámos perceber como dividir melhor o trabalho para se conseguir fazer o código da maneira mais simples possível. Para isto, usámos os pontos especificados no guião, trocando a ordem de alguns. 
+Ainda adicionámos algumas features que não são mencionadas no guião. Por exemplo, quando o nome do país inserido não existe no ficheiro de servidores, ligamo-nos a um servidor qualquer da lista.
+
+\section{Cálculo da latência}
+Para calcular a latência, calculámos o tempo que o server demora a responder PONG após receber PING.
+Neste cálculo, decidimos ignorar o primeiro PING-PONG, uma vez que esse valor seria sempre muito maior do que os outros. Assim, em vez de corrermos o ciclo 11 vezes (para calcular 10 latências), corremos o ciclo 12 vezes.
+
+\section{Cálculo da largura de banda}
+Decidimos que a melhor maneira de calcular a largura de banda seria receber 1 MB de informação (para abrir os portos de informação), enviar a restante informação (INFO - 1 MB) e ver quanto tempo isso demorou (t). Assim, o cálculo seria
+\[\frac{\text{INFO - 1 MB}}{\text{t}}\]
+
+\section{Modulação do código}
+Após fazermos o código necessário para o cálculo da largura de banda, apercebemo-nos de um problema - o nosso código não era modulável de maneira nenhuma. Assim, decidimos pegar no código que tínhamos e fazer com que cada parte fosse uma função. Assim, cada função poderia ser usada sozinha num outro programa qualquer. É de frizar que fazer um programa altamente modulável é uma boa prática de programação e, além disso, é mais fácil testar no que toca à procura de \textit{bugs} e resolução desses mesmos.
+
+\section{Escrita dos documentos}
+Para a escrita, decidimos fazer tudo da maneira mais simples, invocando as funções de cálculo de latência e de cálculo de largura de banda dentro da função que escreve o ficheiro em si. Decidimos abrir o ficheiro em modo "a" em vez de "w", uma vez que, ao abrir em "w", o ficheiro é apagado, enquanto que, abrindo em "a", o texto é adicionado (\textit{appended}).
+Mais tarde, apercebemo-nos que, antes de escrever os dados, temos de limpar o ficheiro \textit{report.csv} de modo a que o ficheiro tenha apenas os dados do último teste que foi feito. Assim, antes de iniciar a escrita do ficheiro, abrimo-lo em modo "wb", o que faz com que o conteúdo do ficheiro seja apagado antes de se começar a escrever.
+
+\section{Robustez}
+No que toca às exceções, decidimos verificar apenas se ocorreu \textit{timeout} ou se houve um \textit{socket error}. Assim, sempre que enviamos ou recebemos informação, testamos estas duas exceções. 
+No que toca à existência do ficheiro \textit{servers.json}, decidimos que, quando ocorresse um erro, o programa iria fechar. Esta é a única rota que faz sentido, uma vez que, se o ficheiro não existir, não será possível entrar em contacto com nenhum server e, assim, não faz sentido fazer o teste.
+
+\section{Encriptação}
+Para a cifragem, decidimos, após a escrita do \textit{report.csv}, reler esse ficheiro e cifrá-lo com a key recebida no ficheiro com a chave a usar (\textit{key.priv}). Depois fazemos o hash desse valor e guardamo-lo no ficheiro \textit{report.sig}.
+
+
+\chapter{Análise}
+\label{chap.analise}
+O ping deu valores muito semelhantes, no entanto a largura de banda apresentou alguns desvios dependendo da internet a utilizar, em casa os valores estavam muitissimo parecidos, no entanto em cafés apresenta resultados maior descrepância de valores. 
+
+\chapter{Conclusões}
+\label{chap.conclusao}
+O projeto deu resultados muitissimo aproximados dos resultados reais recebidos por sites destinados a este tipo de testes, logo consideramos que fomos bem sucedidos neste projeto.
+
+\chapter*{Contribuições dos autores}
+Ambos os estudantes deste projeto participaram aproximadamente o mesmo.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Acrónimos}
+\begin{acronym}
+\acro{ua}[UA]{Universidade de Aveiro}
+\acro{miect}[MIECT]{Mestrado Integrado em Engenharia de Computadores e Telemática}
+\acro{lei}[LEI]{Licenciatura em Engenharia Informática}
+\acro{glisc}[GLISC]{Grey Literature International Steering Committee}
+\end{acronym}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\printbibliography
+
+\end{document}
